@@ -28,6 +28,10 @@ trained_model = model.fit(disp=False)
 # Get user input for the number of months into the future
 num_months = int(input("Enter the number of months into the future you want to see: "))
 
+# Print the Mean Absolute Error (MAE)
+mae = trained_model.mae
+print(f'Mean Absolute Error (MAE): {mae:.2f} pounds')
+
 # Future predictions for the specified number of months
 future_dates = pd.date_range(df.index[-1], periods=num_months * 30, freq='D')  # Assuming 30 days per month
 future_predictions = trained_model.get_forecast(steps=num_months * 30).predicted_mean
