@@ -8,7 +8,7 @@ import plotly.express as px
 warnings.filterwarnings("ignore", message="No frequency information was provided", category=UserWarning)
 
 # Use a raw string for the file path
-file_path = r'C:\Users\Haig\OneDrive\Desktop\Weight_Loss_Journey.xlsx'
+file_path = r'Weight_Loss_Journey.xlsx'
 
 # Load your weight loss data from MyFitnessPal (assuming it's in an Excel file)
 df = pd.read_excel(file_path, engine='openpyxl')
