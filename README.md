@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project focuses on leveraging machine learning techniques to predict future weight changes in my weight loss journey. The predictive model utilizes time series forecasting, specifically the ARIMA (AutoRegressive Integrated Moving Average) algorithm.
+This project focuses on leveraging time series techniques to predict future weight changes in my weight loss journey. The predictive model utilizes time series forecasting, specifically the ARIMA (AutoRegressive Integrated Moving Average) algorithm.
 
 ## Features
 
