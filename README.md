@@ -2,13 +2,13 @@
 
 ## Overview
 
-This project focuses on leveraging time series techniques to predict future weight changes in my weight loss journey. The predictive model utilizes time series forecasting, specifically the ARIMA (AutoRegressive Integrated Moving Average) algorithm.
+This project focuses on leveraging time series techniques to predict future weight changes in my weight loss journey. The predictive model utilizes time series forecasting, specifically the SARIMA (Seasonal AutoRegressive Integrated Moving Average) algorithm.
 
 ## Features
 
 - **Time Series Forecasting:** The core of the project involves analyzing historical weight data to predict future weight trends.
   
-- **ARIMA Model:** The project utilizes the ARIMA model, a statistical method, for time series forecasting. This model is chosen for its effectiveness in capturing temporal patterns.
+- **SARIMA Model:** The project utilizes the SARIMA model, a statistical method, for time series forecasting. This model is chosen for its effectiveness in capturing temporal patterns.
 
 - **Interactive Visualization:** The predictions are visualized using Plotly Express, allowing users to explore historical weight data and future predictions interactively.
 
