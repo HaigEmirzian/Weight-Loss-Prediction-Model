@@ -34,6 +34,7 @@ To run the model and receive a prediction 30 days out, execute the following com
 ```
 python RNN_model.py
 ```
+![RNN_output](images/RNN_output.png)
 
 This updated repo contains the transition from a SARIMA-based approach found in [WL_Model.py](/WL_Model.py) to an RNN model for improved weight prediction accuracy.
 
