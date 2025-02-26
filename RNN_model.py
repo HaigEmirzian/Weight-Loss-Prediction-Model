@@ -7,6 +7,7 @@ from sklearn.model_selection import train_test_split
 from torch.optim import Adam
 from torch.utils.data import TensorDataset
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Function to import data and preprocess it
 def load_and_preprocess_data(file_path, window_size=30):
@@ -86,7 +87,7 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs):
         epoch_loss = 0
         for batch in train_loader:
             X_batch, y_batch = batch
-            X_batch, y_batch = X_batch.to(device='cpu'), y_batch.to(device='cpu')
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             y_batch = y_batch.view(-1, 1)
 
             # Forward pass
@@ -105,34 +106,39 @@ def train_model(model, train_loader, loss_fn, optimizer, num_epochs):
 
 
 # Function to evaluate the model
-def evaluate_model(model, test_loader, loss_fn):
+def evaluate_model(model, test_loader, loss_fn, data_min, data_max):
     model.eval()
-    test_loss = 0
+    all_predictions = []
+    all_targets = []
     with torch.no_grad():
-        for batch in test_loader:
-            X_batch, y_batch = batch
-            X_batch, y_batch = X_batch.to(device='cpu'), y_batch.to(device='cpu')
+        for X_batch, y_batch in test_loader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
             y_batch = y_batch.view(-1, 1)
-
-            # Forward pass
             y_hat = model(X_batch)
-            loss = loss_fn(y_hat, y_batch)
-            test_loss += loss.item()
+            all_predictions.append(y_hat)
+            all_targets.append(y_batch)
+    
+    predictions = torch.cat(all_predictions, dim=0)
+    targets = torch.cat(all_targets, dim=0)
+    mse = torch.mean((predictions - targets) ** 2)
+    rmse = torch.sqrt(mse)
+    rmse_pounds = rmse.item() * (data_max - data_min)
 
-    print(f"Test Loss: {test_loss / len(test_loader)}")
+    print(f"\nTest RMSE in pounds: {rmse_pounds:.4f} lbs")
 
 
 # Function to predict future weight
 def predict_weight(model, new_data, data_min, data_max):
     model.eval()
-    new_data = new_data.clone().detach().float()
+    new_data = (new_data - data_min) / (data_max - data_min)
+    new_data = new_data.clone().detach().float().to(device)
     new_data = new_data.view(1, -1, 1)
+    
     with torch.no_grad():
         prediction = model(new_data)
 
-    # Denormalize the prediction
     denormalized_prediction = prediction.item() * (data_max - data_min) + data_min
-    print(f"Future weight: {denormalized_prediction}")
+    print(f"\nFuture weight: {denormalized_prediction:.0f} pounds")
 
 
 if __name__ == "__main__":
@@ -143,18 +149,17 @@ if __name__ == "__main__":
     train_loader, test_loader = prepare_data_loaders(X_train, X_test, y_train, y_test)
 
     # Initialize model, loss function, and optimizer
-    model = Weight_Model().to(device='cpu')
+    model = Weight_Model().to(device)
     loss_fn = nn.MSELoss()
     optimizer = Adam(model.parameters(), lr=0.001)
 
     train_model(model, train_loader, loss_fn, optimizer, num_epochs=1000)
 
-    evaluate_model(model, test_loader, loss_fn)
+    evaluate_model(model, test_loader, loss_fn, data_min, data_max)
 
     # Predict future weight
     historical_weights = df['Weight'].values
     weight_tensor = torch.tensor(historical_weights).to(torch.float32)
 
     new_data = weight_tensor[-30:]
-    print(new_data)
     predicted_weight = predict_weight(model, new_data, data_min, data_max)
