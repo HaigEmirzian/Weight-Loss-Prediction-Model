@@ -1,9 +1,9 @@
 # Import dependencies
 from pandas import read_excel
+from sklearn.model_selection import train_test_split
 import torch 
 from torch.nn import Sequential
 from torch import nn
-from sklearn.model_selection import train_test_split
 from torch.optim import Adam
 from torch.utils.data import TensorDataset
 
