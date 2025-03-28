@@ -12,46 +12,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Function to import data and preprocess it
 def load_and_preprocess_data(file_path, window_size=30):
     df = read_excel(file_path)
-    weights = df['Weight'].values
-    weight_tensor = torch.tensor(weights).to(torch.float32)
-    
-    # Normalize data
-    data_min = weight_tensor.min()
-    data_max = weight_tensor.max()
-    
-    def normalize_data(weight_tensor, data_min, data_max):
-        return (weight_tensor - data_min) / (data_max - data_min)
-
-    normalized_weights = normalize_data(weight_tensor, data_min, data_max)
-
-    # Generate sliding window data
-    def sliding_window(normalized_weights, window_size):
-        for i in range(len(normalized_weights) - window_size):
-            window = normalized_weights[i:i + window_size]
-            output = normalized_weights[i + window_size]
-            yield window, output
-
-    data = list(sliding_window(normalized_weights, window_size))
-    X = [x[0] for x in data]
-    y = [x[1] for x in data]
-    
-    X = torch.stack(X).numpy()
-    y = torch.stack(y).numpy()
-
-    # Split the data into train and test
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-    # Reshape data for LSTM input
-    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
-    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
-
-    # Convert to torch tensors
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.float32)
-    X_test = torch.tensor(X_test, dtype=torch.float32)
-    y_test = torch.tensor(y_test, dtype=torch.float32)
-
-    return X_train, X_test, y_train, y_test, df, data_min, data_max
+    return load_and_preprocess_data_from_df(df, window_size)
 
 
 # Function to prepare data loaders
@@ -139,6 +100,52 @@ def predict_weight(model, new_data, data_min, data_max):
 
     denormalized_prediction = prediction.item() * (data_max - data_min) + data_min
     print(f"\nFuture weight: {denormalized_prediction:.0f} pounds")
+    
+    # Convert to float before returning
+    return float(denormalized_prediction)
+
+
+def load_and_preprocess_data_from_df(df, window_size=30):
+    weights = df['Weight'].values
+    weight_tensor = torch.tensor(weights).to(torch.float32)
+    
+    # Normalize data
+    data_min = weight_tensor.min()
+    data_max = weight_tensor.max()
+    
+    def normalize_data(weight_tensor, data_min, data_max):
+        return (weight_tensor - data_min) / (data_max - data_min)
+
+    normalized_weights = normalize_data(weight_tensor, data_min, data_max)
+
+    # Generate sliding window data
+    def sliding_window(normalized_weights, window_size):
+        for i in range(len(normalized_weights) - window_size):
+            window = normalized_weights[i:i + window_size]
+            output = normalized_weights[i + window_size]
+            yield window, output
+
+    data = list(sliding_window(normalized_weights, window_size))
+    X = [x[0] for x in data]
+    y = [x[1] for x in data]
+    
+    X = torch.stack(X).numpy()
+    y = torch.stack(y).numpy()
+
+    # Split the data into train and test
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    # Reshape data for LSTM input
+    X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1)
+    X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1)
+
+    # Convert to torch tensors
+    X_train = torch.tensor(X_train, dtype=torch.float32)
+    y_train = torch.tensor(y_train, dtype=torch.float32)
+    X_test = torch.tensor(X_test, dtype=torch.float32)
+    y_test = torch.tensor(y_test, dtype=torch.float32)
+
+    return X_train, X_test, y_train, y_test, df, data_min, data_max
 
 
 if __name__ == "__main__":

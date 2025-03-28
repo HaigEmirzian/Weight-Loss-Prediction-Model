@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weight Prediction</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Weight Prediction Model</h1>
+        <form id="predictionForm">
+            <div class="form-group">
+                <label for="file">Upload Weight Data (XLSX or CSV)</label>
+                <input type="file" id="file" name="file" accept=".xlsx,.csv" required>
+            </div>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="result" style="display: none;"></div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
